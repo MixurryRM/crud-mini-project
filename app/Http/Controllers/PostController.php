@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
@@ -13,12 +14,17 @@ class PostController extends Controller
     }
 
     public function create(Request $request){
-        Post::create([
-            'title' => $request->title,
-            'description' => $request->description,
-        ]);
 
-        return redirect()->route('post#readPage');
+        // dd($request->all())
+        $this->postValidationCheck($request,"create");
+        $data = $this->requestDataPost($request);
+
+        $fileName = uniqid().$request->file('image')->getClientOriginalName();
+        $request->file('image')->storeAs('public',$fileName);
+        $data['image'] = $fileName;
+        Post::create($data);
+
+        return redirect()->route('post#readPage')->with(['updateSuccess' => 'Post Updated Successful']);
     }
 
     public function readPage(){
@@ -36,24 +42,42 @@ class PostController extends Controller
         return view('crud.edit',compact('post'));
     }
 
-    public function update($id,Request $request){
-        $post = $this->getDataPost($request);
-        $Post = $this->postValidationCheck($request);
-        Post::where('id',$id)->update($post);
+    public function update(Request $request){
+
+        $data = $this->requestDataPost($request);
+        $this->postValidationCheck($request,"update");
+
+        if($request->hasFile('image')){
+            $oldImageName = Post::where('id',$request->id)->first();
+            $oldImageName = $oldImageName->image;
+
+            Storage::delete('public/'.$oldImageName);
+
+
+            $fileName = uniqid().$request->file('image')->getClientOriginalName();
+
+            $request->file('image')->storeAs('public/'.$fileName);
+            $data['image'] = $fileName;
+        }
+        // dd($data);
+        Post::where('id',$request->id)->update($data);
         return redirect()->route('post#readPage')->with(['updateSuccess' => 'Post Updated...']);
     }
 
       //validation check
-    private function postValidationCheck($request){
+    private function postValidationCheck($request,$status){
          $validationRule = [
             "title" => 'required|min:3|unique:posts,title,'.$request->id,
             "description" => "required",
         ];
+
+        $validationRule['image'] = $status == 'create' ? 'required|mimes:jpg,jpeg,png,webp|file' : "mimes:jpg,jpeg,png,webp|file";
+
         Validator::make($request->all(),$validationRule)->validate();
     }
 
     //request post data
-    private function getDataPost($request){
+    private function requestDataPost($request){
         return[
             'title' => $request->title,
             'description' => $request->description

@@ -14,4 +14,4 @@ Route::get('read/page',[PostController::class,'readPage'])->name('post#readPage'
 Route::get('delete/{id}',[PostController::class,'delete'])->name('post#delete');
 
 Route::get('edit/page/{id}',[PostController::class,'editPage'])->name('post#editPage');
-Route::post('update/{id}',[PostController::class,'update'])->name('post#update');
+Route::post('update',[PostController::class,'update'])->name('post#update');

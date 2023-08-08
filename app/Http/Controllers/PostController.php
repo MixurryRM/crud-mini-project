@@ -24,7 +24,7 @@ class PostController extends Controller
         $data['image'] = $fileName;
         Post::create($data);
 
-        return redirect()->route('post#readPage')->with(['updateSuccess' => 'Post Updated Successful']);
+        return redirect()->route('post#readPage')->with(['updateSuccess' => 'Post Creating Successful']);
     }
 
     public function readPage(){

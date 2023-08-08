@@ -36,7 +36,8 @@
                 @foreach ($post as $p)
                     <tr>
                         <td>{{ $p->id }}</td>
-                        <td><img src="{{ asset('storage/' . $p->image) }}" class="shadow-sm w-100" style="height:40px"></td>
+                        <td><img src="{{ asset('storage/' . $p->image) }}" class="shadow-sm w-60" style="height:60px">
+                        </td>
                         <td>{{ $p->title }}</td>
                         <td>{{ $p->description }}</td>
                         <td>{{ $p->created_at->format('j-F-Y') }}</td>
